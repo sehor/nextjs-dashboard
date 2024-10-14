@@ -1,15 +1,8 @@
 import AcmeLogo from '@/app/ui/acme-logo';
-import LoginForm from '@/app/ui/login-form';
+import RegisterForm from '@/app/ui/register-form';
 import Link from 'next/link';
-import { RegisteredMessage } from './registered-message';
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { registered?: string };
-}) {
-  const registered = searchParams.registered;
-
+export default function RegisterPage() {
   return (
     <main className="flex items-center justify-center md:h-screen">
       <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
@@ -18,12 +11,11 @@ export default function LoginPage({
             <AcmeLogo />
           </div>
         </div>
-        <RegisteredMessage registered={registered} />
-        <LoginForm />
+        <RegisterForm />
         <p className="text-center text-sm">
-          Don't have an account?{' '}
-          <Link href="/register" className="text-blue-500 hover:underline">
-            Register
+          Already have an account?{' '}
+          <Link href="/login" className="text-blue-500 hover:underline">
+            Log in
           </Link>
         </p>
       </div>
