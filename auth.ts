@@ -5,11 +5,12 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
- 
+
+const TEN_DAYS = 10 * 24 * 60 * 60; // 10天的秒数
+
 async function getUser(email: string): Promise<User | undefined> {
   try {
     const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-    console.log('Fetched user:', user.rows[0]); // 保留这个日志
     return user.rows[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
@@ -17,12 +18,11 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
  
-export const { auth, signIn, signOut } = NextAuth({
+export const { handlers,signIn,signOut,auth } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
-        console.log('Authorizing with credentials:', credentials); // 保留这个日志
 
         const parsedCredentials = z
           .object({ 
@@ -40,7 +40,6 @@ export const { auth, signIn, signOut } = NextAuth({
           }
           const passwordsMatch = await bcrypt.compare(password, user.password);
  
-          console.log('Passwords match:', passwordsMatch); // 保留这个日志
 
           if (passwordsMatch) {
             // 返回不包含密码的用户对象
@@ -55,16 +54,23 @@ export const { auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: TEN_DAYS, // 设置会话最大有效期为10天
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // 首次登录时设置用户ID和名字
         token.userId = user.id;
+        token.userName = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.userId as string;
+        session.user.name = token.userName as string;
       }
       return session;
     },

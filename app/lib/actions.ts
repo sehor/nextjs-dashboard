@@ -64,14 +64,15 @@ export async function authenticate(
       ...Object.fromEntries(formData),
       redirect: false,
     });
-    return 'redirect';
+    revalidatePath('/'); // 重新验证根路径
+    redirect('/dashboard'); // 登录成功后重定向到仪表板
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return 'Invalid credentials.';
+          return '无效的凭据';
         default:
-          return 'Something went wrong.';
+          return '发生了错误';
       }
     }
     throw error;

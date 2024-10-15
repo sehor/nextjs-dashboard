@@ -19,7 +19,7 @@ export default function LoginForm() {
   const router = useRouter();
 
   useEffect(() => {
-    if (errorMessage === 'redirect') {
+    if (!errorMessage) {
       router.push('/dashboard');
     }
   }, [errorMessage, router]);
